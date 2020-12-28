@@ -10,6 +10,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import { Auth } from 'aws-amplify'
 
 function Copyright() {
   return (
@@ -50,12 +51,20 @@ export default function Login(props) {
   const [email, setEmail] = useState("")
   const [error, setError] = useState("")
 
-  let signInClicked = () => {
+  let signInClicked = async () => {
     if (email.trim().length == 0 || password.trim().length == 0) {
         setError("Email and/or password must not be empty")
     } else {
         setError("")
-        console.log(password + " " + email)
+        try {
+            const signInResp = await Auth.signIn(email, password)
+            console.log(signInResp)
+            props.authData.setAuth(true)
+            props.authData.setUser(signInResp)
+            props.history.push("/")
+        } catch(error) {
+            setError(error.message)
+        }
     }
   }
 

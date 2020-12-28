@@ -16,13 +16,13 @@ import {useState} from 'react'
 
 function App() {
   const [authenticated, setAuth] = useState(false)
-  const [userInfo, setUserInfo] = useState({"username":null, "password":null})
+  const [user, setUser] = useState(null)
 
   let authData = {
     "authenticated": authenticated,
     "setAuth": setAuth,
-    "userInfo": userInfo,
-    "setUserInfo": setUserInfo
+    "user": user,
+    "setUser": setUser
   }
 
   return (
