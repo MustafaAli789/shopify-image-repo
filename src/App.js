@@ -11,12 +11,28 @@ import {
 import MainPage from './Components/MainPage.js'
 import Login from './Components/Login'
 import Register from './Components/Register'
+import { Auth } from 'aws-amplify'
 
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 
 function App() {
   const [authenticated, setAuth] = useState(false)
+  const [isAuthenticating, setIsAuthenticating] = useState(true)
   const [user, setUser] = useState(null)
+
+  useEffect(async () => {
+    try{
+      const session = await Auth.currentSession()
+      setAuth(true)
+      setIsAuthenticating(false)
+      const user = await Auth.currentAuthenticatedUser()
+      setUser(user)
+    } catch(error) {
+      setIsAuthenticating(false)
+      setAuth(false)
+      console.log(error)
+    }
+  }, [])
 
   let authData = {
     "authenticated": authenticated,
@@ -26,9 +42,10 @@ function App() {
   }
 
   return (
+    !isAuthenticating && 
     <Router>
       <Switch>
-        <Route exact path="/" render={(props) => authenticated ? <MainPage {...props} authData={authData} /> : <Redirect to="/login" />}></Route>
+        <Route exact path="/" render={(props) => <MainPage {...props} authData={authData} />}></Route>
         <Route exact path="/login" render={(props) => <Login {...props} authData={authData} />}></Route>
         <Route exact path="/register" render={(props) => <Register {...props} authData={authData} />}></Route>
       </Switch>

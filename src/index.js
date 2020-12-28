@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import Amplify from 'aws-amplify'
+import Amplify, { Auth, Storage } from 'aws-amplify'
 import config from './config.json'
 
 Amplify.configure({
@@ -12,7 +12,14 @@ Amplify.configure({
     region: config.cognito.REGION,
     userPoolId: config.cognito.USER_POOL_ID,
     userPoolWebClientId: config.cognito.APP_CLIENT_ID,
-    authenticationFlowType: 'USER_PASSWORD_AUTH'
+    authenticationFlowType: 'USER_PASSWORD_AUTH',
+    identityPoolId: config.cognito.IDENTITY_POOL_ID
+  },
+  Storage :{
+    AWSS3: {
+      bucket: config.s3.BUCKET,
+      region: config.s3.REGION
+    }
   }
 })
 

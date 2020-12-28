@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -50,6 +50,12 @@ export default function Login(props) {
   const [password, setPassword] = useState("")
   const [email, setEmail] = useState("")
   const [error, setError] = useState("")
+
+  useEffect(() => {
+    if(props.authData.authenticated) {
+        props.history.push("/")
+    }
+  }, [props.authData.authenticated])
 
   let signInClicked = async () => {
     if (email.trim().length == 0 || password.trim().length == 0) {
