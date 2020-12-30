@@ -40,7 +40,7 @@ const ImageCard = props => {
             />
             <CardMedia
                 className={classes.media}
-                image={props.imageData.imageSrc}
+                image={props.imageData.image}
                 title={props.imageData.imageId}
             />
             <CardContent>
@@ -49,7 +49,7 @@ const ImageCard = props => {
                 </Typography>
             </CardContent>
             <CardActions>
-                <Button size="small" color="primary">
+                <Button size="small" color="primary" onClick={() => props.updateImage(props.imageData)}>
                 	Update
                 </Button>
                 <Button size="small" color="primary">
