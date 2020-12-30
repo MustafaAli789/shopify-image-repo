@@ -51,7 +51,7 @@ const MainPage = props => {
         setImageColor(imageData["color"])
         setImageDesc(imageData["description"])
         setImageTitle(imageData["title"])
-        let imgFile = await urltoFile(imageData["img"], imageData["title"], "image/png")
+        let imgFile = await urltoFile(imageData["img"], imageData["imageName"], "image/png")
         debugger
         setImageFile(imgFile)
         setImageModalOpen(true)
@@ -68,6 +68,7 @@ const MainPage = props => {
                     .then(res => {
                         let imageData = {
                             "avatarInitial": "M",
+                            "imageName": photo.key,
                             "title": "Random Moment in Time",
                             "date": "September 1 2001",
                             "image": res,
@@ -83,15 +84,13 @@ const MainPage = props => {
         }
     }, [])
 
-    const onChange = (e) => {
-        const file = e.target.files[0];
-        Storage.put('example.png', file, {
-            level: 'private',
-            contentType: 'image/png'
-        })
-        .then (result => console.log(result))
-        .catch(err => console.log(err));
+    const resetImageData = () => {
+        setImageColor("#FF0000")
+        setImageTitle("")
+        setImageDesc("")
+        setImageFile(null)
     }
+
 
     const deleteImage = id => {
         //perform s3 deletion
@@ -102,7 +101,7 @@ const MainPage = props => {
     }
 
     const createNewImage = imageData => {
-        //perform neessary steps
+        
     }
 
     return (
@@ -126,7 +125,8 @@ const MainPage = props => {
                 </Typography> */}
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.8rem' }}>
                     <IconButton onClick={() => {
-                        console.log('sup kutt')
+                        resetImageData()
+                        setImageModalAction('CREATE')
                         setImageModalOpen(true)
                     }} size="medium" style={{ width: "100%", borderRadius: "10px" }} aria-label="Add a photo">
                         <AddAPhotoIcon style={{ width:'1.5em', height: '1.5em' }} />

@@ -22,6 +22,35 @@ const ImageModal = props => {
       }));
 
     let classes = useStyles();
+
+    const validateData = (title, file) => {
+        let titleError = ""
+        let fileError = ""
+        debugger
+        if (title.trim().length == 0) {
+            titleError = "Title must not be empty"
+        } else {
+            titleError = ""
+        }
+        if (file == null) {
+            fileError = "Must attach an image"
+        } else {
+            fileError = ""
+        }
+
+        if (titleError.length > 0 && fileError.length > 0) {
+            alert(titleError +  " and " + fileError)
+        } else if (titleError.length > 0) {
+            alert(titleError)
+        } else if (fileError.length > 0) {
+            alert(fileError)
+        } else {
+            return true
+        }
+
+        return false
+
+    }
     
     return (
         <Dialog open={props.imageModalOpen} aria-labelledby="form-dialog-title">
@@ -69,7 +98,13 @@ const ImageModal = props => {
                         initialFiles = {props.imageFile != null ? [props.imageFile] : []}
                         acceptedFiles={['image/*']}
                         dropzoneText={"Drag and drop an image here or click"}
-                        onChange={(files) => props.setImageFile(files[0])}
+                        onChange={(files) => {
+                            if (files[0] == undefined) {
+                                props.setImageFile(null)
+                            } else {
+                                props.setImageFile(files[0])
+                            }
+                        }}
                         filesLimit={1}
                         showPreviews={true}
                         showPreviewsInDropzone={false}
@@ -84,7 +119,12 @@ const ImageModal = props => {
             <Button onClick={() => props.setImageModalOpen(false)} color="primary">
                 Cancel
             </Button>
-            <Button onClick={() => props.setImageModalOpen(false)} color="primary">
+            <Button onClick={() => {
+                    if (validateData(props.imageTitle, props.imageFile)) {
+                        props.setImageModalOpen(false)
+                    }
+                }} 
+                color="primary">
                 {action}
             </Button>
             </DialogActions>
