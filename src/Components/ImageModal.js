@@ -3,7 +3,6 @@ import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import { SliderPicker } from 'react-color';
@@ -13,6 +12,27 @@ import { createStyles, makeStyles } from '@material-ui/core/styles';
 
 const ImageModal = props => {
     let action = props.action == "CREATE" ? 'Create' : 'Update'
+
+    const [imageTitle, setImageTitle] = useState("")
+    const [imageColor, setImageColor] = useState("#FF0000")
+    const [imageFile, setImageFile] = useState("")
+    const [imageDesc, setImageDesc] = useState("")
+    
+    const [file, setFile] = useState(null)
+
+    useEffect(() => {
+        setImageTitle(props.imageModalData["title"])
+        setImageColor(props.imageModalData["color"])
+        setImageFile(props.imageModalData["imageSrc"])
+        setImageDesc(props.imageModalData["description"])
+
+        if (props.imageModalData["imageSrc"] != "") {
+            let img = new File([""], props.imageModalData["imageName"],{type: "image/png"})
+            setFile(img)
+        } else {
+            setFile(null)
+        }
+    }, [props.imageModalOpen])
     
     const useStyles = makeStyles(theme => createStyles({
         previewChip: {
@@ -64,8 +84,8 @@ const ImageModal = props => {
                     type="text"
                     fullWidth
                     style={{ marginTop: "0.6rem" }}
-                    onChange={e => props.setImageTitle(e.target.value)}
-                    value={props.imageTitle}
+                    onChange={e => setImageTitle(e.target.value)}
+                    value={imageTitle}
                 />
                 <TextField
                     autoFocus
@@ -78,16 +98,16 @@ const ImageModal = props => {
                     rows={1}
                     rowsMax={4}
                     style={{ marginTop: "0.8rem" }}
-                    onChange={e => props.setImageDesc(e.target.value)}
-                    value={props.imageDesc}
+                    onChange={e => setImageDesc(e.target.value)}
+                    value={imageDesc}
                 />
                 <div style={{ marginTop: "1rem" }}>
                     <Typography variant="body1" style={{ color: "rgba(0, 0, 0, 0.54)", marginBottom: "0.25rem" }}>
                         Tag Color
                     </Typography>
                     <SliderPicker
-                        color={props.imageColor}
-                        onChangeComplete={(color) => props.setImageColor(color.hex)}>
+                        color={imageColor}
+                        onChangeComplete={(color) => setImageColor(color.hex)}>
                     </SliderPicker>
                 </div>
                 <div style={{ marginTop: "1rem" }}>
@@ -95,14 +115,15 @@ const ImageModal = props => {
                             File Uploader
                     </Typography>
                     <DropzoneArea
-                        initialFiles = {props.imageFile != null ? [props.imageFile] : []}
+                        initialFiles = {file != null ? [file] : []}
                         acceptedFiles={['image/*']}
                         dropzoneText={"Drag and drop an image here or click"}
                         onChange={(files) => {
+                            console.log(files)
                             if (files[0] == undefined) {
-                                props.setImageFile(null)
+                                setFile(null)
                             } else {
-                                props.setImageFile(files[0])
+                                setFile(files[0])
                             }
                         }}
                         filesLimit={1}
@@ -120,8 +141,14 @@ const ImageModal = props => {
                 Cancel
             </Button>
             <Button onClick={() => {
-                    if (validateData(props.imageTitle, props.imageFile)) {
-                        props.setImageModalOpen(false)
+                    if (validateData(imageTitle, file)) {
+                       if (props.action == "CREATE") {
+                           props.createNewImage({
+                               "imageTitle":imageTitle,
+                               "description":imageDesc,
+                               "color":imageColor,
+                           }, file)
+                       }
                     }
                 }} 
                 color="primary">

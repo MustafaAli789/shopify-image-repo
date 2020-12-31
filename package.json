@@ -9,6 +9,7 @@
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.6.0",
     "aws-amplify": "^3.3.13",
+    "firebase": "^8.2.1",
     "material-ui-dropzone": "^3.5.0",
     "react": "^17.0.1",
     "react-color": "^2.19.3",

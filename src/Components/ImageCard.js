@@ -40,7 +40,7 @@ const ImageCard = props => {
             />
             <CardMedia
                 className={classes.media}
-                image={props.imageData.image}
+                image={props.imageData.imageSrc}
                 title={props.imageData.imageId}
             />
             <CardContent>
