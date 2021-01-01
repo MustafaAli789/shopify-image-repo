@@ -67,7 +67,6 @@ const MainPage = props => {
         let imagesData = []
         try {
             const snapshot = await db.collection(email).get()
-            debugger
             imagesData = snapshot.docs.map(doc => {
                 return Object.assign({}, doc.data(), { 
                     "avatarInitial": props.authData.user.username.charAt(0),
@@ -104,6 +103,14 @@ const MainPage = props => {
         setImageModalData(imageDataModel(props.authData.user))
     }
 
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    //DELETEING IMAGE
     const deleteImage = id => {
         console.log(id)
     }
@@ -114,24 +121,39 @@ const MainPage = props => {
     }
 
     //CREATING IMAGE
-    const createNewImage = (imageData, file) => {
+    const createNewImage = async (data, file) => {
+        debugger
         let email = props.authData.user.username
         let id = new Date().valueOf() + "-" + email
-        db.collection(email).doc(id).set({
-            imageName: file.name,
-            title: imageData.title,
-            description: imageData.description,
-            date: new Date().toISOString().split('T')[0],
-            color: imageData.color
-        })
-        .then(() => {
-            Storage.put(id, file, {
+        debugger
+        try {
+            await db.collection(email).doc(id).set({
+                imageName: file.name,
+                title: data.title,
+                description: data.description,
+                date: new Date().toISOString().split('T')[0],
+                color: data.color
+            })
+           await Storage.put(id, file, {
                 level: 'private',
                 contentType: 'image/png'
             })
-            .catch(err => alert("Image data was saved but error persisting image", err))
-        })
-        .catch(err => alert("Problem persisting data and image", err))
+        } catch (err) {
+            alert("Error persisting image", err)
+        }
+
+        let imageSrc = await toBase64(file)
+        let imageDataObj = {
+            "imageName": file.name,
+            "title": data.title,
+            "description": data.description,
+            "date": new Date().toISOString().split('T')[0],
+            "color": data.color,
+            "imageId": id,
+            "avatarInitial": email.charAt(0),
+            "imageSrc": imageSrc
+        }
+        setImagesData([...imagesData, imageDataObj])
     }
 
     return (

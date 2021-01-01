@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardHeader from '@material-ui/core/CardHeader';
@@ -7,7 +7,7 @@ import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from '@material-ui/core/CardContent';
 import Avatar from '@material-ui/core/Avatar';
 import Typography from '@material-ui/core/Typography';
-import { red } from '@material-ui/core/colors';
+import Dialog from '@material-ui/core/Dialog';
 import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button'
 import './ImageCard.css'
@@ -25,10 +25,14 @@ const useStyles = makeStyles(() => ({
 const ImageCard = props => {
 
 	const classes = useStyles();
-	const avatarStyle = {backgroundColor: props.imageData.color}
+    const avatarStyle = {backgroundColor: props.imageData.color}
+    const [open, setOpen] = useState(false)
    
-    return (
+    return (  
         <Card className={classes.root + " imageCard"}>
+            <Dialog open={open} onClose={() => setOpen(false)}>
+                <img style={{ width: '100%' }} src={props.imageData.imageSrc} />
+            </Dialog>
             <CardHeader
                 avatar={
                 <Avatar aria-label="recipe" style={avatarStyle}>
@@ -39,6 +43,8 @@ const ImageCard = props => {
                 subheader={props.imageData.date}
             />
             <CardMedia
+                className={'imageCard'}
+                onClick={() => setOpen(true)}
                 className={classes.media}
                 image={props.imageData.imageSrc}
                 title={props.imageData.imageId}
