@@ -11,6 +11,7 @@ import Dialog from '@material-ui/core/Dialog';
 import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button'
 import './ImageCard.css'
+import DeleteModal from './DeleteModal'
 
 const useStyles = makeStyles(() => ({
   root: {
@@ -27,12 +28,14 @@ const ImageCard = props => {
 	const classes = useStyles();
     const avatarStyle = {backgroundColor: props.imageData.color}
     const [open, setOpen] = useState(false)
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
    
     return (  
         <Card className={classes.root + " imageCard"}>
             <Dialog open={open} onClose={() => setOpen(false)}>
                 <img style={{ width: '100%' }} src={props.imageData.imageSrc} />
             </Dialog>
+            <DeleteModal imageTitle={props.imageData.title} deleteImg={props.deleteImg} open={deleteModalOpen} setDeleteModalOpen={(state) => setDeleteModalOpen(state)}></DeleteModal>
             <CardHeader
                 avatar={
                 <Avatar aria-label="recipe" style={avatarStyle}>
@@ -58,7 +61,9 @@ const ImageCard = props => {
                 <Button size="small" color="primary" onClick={() => props.updateImage(props.imageData)}>
                 	Update
                 </Button>
-                <Button size="small" color="primary" onClick={props.deleteImg}>
+                <Button size="small" color="primary" onClick={() => {
+                    setDeleteModalOpen(true)
+                }}>
                 	Delete
                 </Button>
             </CardActions>

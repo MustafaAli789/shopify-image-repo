@@ -17,6 +17,8 @@ const ImageModal = props => {
     const [imageColor, setImageColor] = useState("#FF0000")
     const [imageFile, setImageFile] = useState("")
     const [imageDesc, setImageDesc] = useState("")
+
+    const [imageLastModified, setImageLastModified] = useState(null)
     
     const [file, setFile] = useState(null)
 
@@ -29,10 +31,11 @@ const ImageModal = props => {
         if (props.imageModalData["imageSrc"] != "") {
             let img = new File([""], props.imageModalData["imageName"],{type: "image/png"})
             setFile(img)
-            props.setImageUpdated(false)
+            setImageLastModified(img.lastModified)
         } else {
             setFile(null)
         }
+        props.setImageUpdated(false)
     }, [props.imageModalOpen])
     
     const useStyles = makeStyles(theme => createStyles({
@@ -119,15 +122,16 @@ const ImageModal = props => {
                         acceptedFiles={['image/*']}
                         dropzoneText={"Drag and drop an image here or click"}
                         onChange={(files) => {
-                            console.log(files)
-                            debugger
+
                             if (files[0] == undefined) {
                                 setFile(null)
-                                if (props.action != 'CREATE') {
-                                    props.setImageUpdated(true)
-                                }
                             } else {
                                 setFile(files[0])
+                                
+                                //new image will have a diff last modified
+                                if (files[0].lastModified != imageLastModified) {
+                                    props.setImageUpdated(true)
+                                }
                             }
                         }}
                         filesLimit={1}

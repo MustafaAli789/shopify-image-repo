@@ -141,20 +141,25 @@ const MainPage = props => {
         }
     }
 
-    //DELETEING IMAGE
+    //DELETING IMAGE
     const deleteImage = async (id) => {
-        debugger
+        
+        let deletedFromDb = false
         try {
             await db.collection(props.authData.user.username).doc(id).delete()
+            deletedFromDb = true
         } catch(err) {
             alert("Error deleting image data")
+        }
+        if (deletedFromDb){
+            try {
+                await Storage.remove(id, { level: 'private' })
+            } catch(err) {
+                alert("Error deleting image data")
+            }
         }
 
-        try {
-            await Storage.remove(id, { level: 'private' })
-        } catch(err) {
-            alert("Error deleting image data")
-        }
+        //Fake delete if the above doesnt end up working
         let tempData = imagesData
         tempData = tempData.filter(img => {
             return img.imageId != id
@@ -169,7 +174,7 @@ const MainPage = props => {
             persistImageInS3(data.imageId, file)
         }
 
-        debugger
+        //Can still fake update locally even if the above fail and throw some errors
         let tempData = imagesData
         for (let i =0; i< tempData.length; i++) {
             if (tempData[i].imageId == data.imageId) {
@@ -194,6 +199,7 @@ const MainPage = props => {
             persistImageInS3(id, file)
         }
 
+        //Can still fake update even if the above fail and throw some errors
         let imageSrc = await toBase64(file)
         let imageDataObj = {
             "imageName": file.name,
