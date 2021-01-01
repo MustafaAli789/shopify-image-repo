@@ -9,7 +9,7 @@ import ImageCard from './ImageCard'
 import IconButton from '@material-ui/core/IconButton';
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import ImageModal from './ImageModal'
-import firebase from '../firebaseWithSecrets'
+import firebase from '../firebase'
 
 const useStyles = makeStyles((theme) => ({
   root: {
