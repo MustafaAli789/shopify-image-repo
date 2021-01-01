@@ -52,10 +52,10 @@ export default function Login(props) {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if(props.authData.authenticated) {
+    if(props.authenticated && !props.isAuthenticating) {
         props.history.push("/")
     }
-  }, [props.authData.authenticated])
+  }, [props.authenticated, props.isAuthenticating])
 
   let signInClicked = async () => {
     if (email.trim().length == 0 || password.trim().length == 0) {
@@ -64,10 +64,10 @@ export default function Login(props) {
         setError("")
         try {
             const signInResp = await Auth.signIn(email, password)
-            console.log(signInResp)
-            props.authData.setAuth(true)
-            props.authData.setUser(signInResp)
-            props.history.push("/")
+            props.setAuth(true)
+            props.setUser(signInResp)
+            props.setUserConfirmed(true)
+            props.setIsAuthenticating(false)
         } catch(error) {
             setError(error.message)
         }

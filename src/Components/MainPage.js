@@ -23,9 +23,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const imageDataModel = user => {
+const imageDataModel = userData => {
+    debugger
     return {
-        "avatarInitial": user.username.charAt(0),
+        "avatarInitial": userData.username.charAt(0),
         "imageName": "",
         "imageId": "",
         "title": "",
@@ -42,21 +43,20 @@ const MainPage = props => {
     
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [imageModalAction, setImageModalAction] = useState('CREATE')
-    const [imageModalData, setImageModalData] = useState(imageDataModel(props.authData.user))
+    const [imageModalData, setImageModalData] = useState(imageDataModel(props.user))
     const [imageUpdated, setImageUpdated] = useState(false)
 
     const [db, setDb] = useState(null)
 
     //Auth redirect and initialize images data
     useEffect(() => {
-        if (!props.authData.authenticated) {
+        if (!props.authenticated) {
             setDb(null)
             setImagesData([])
             props.history.push("/login")
         }
-
         setDb(firebase.firestore())
-    }, [props.authData.authenticated])
+    }, [props.authenticated])
 
     useEffect(() => {
         if (db != null) {
@@ -65,13 +65,13 @@ const MainPage = props => {
     }, [db])
 
     const initializeImageData = async () => {
-        let email = props.authData.user.username
+        let email = props.user.username
         let imagesData = []
         try {
             const snapshot = await db.collection(email).get()
             imagesData = snapshot.docs.map(doc => {
                 return Object.assign({}, doc.data(), { 
-                    "avatarInitial": props.authData.user.username.charAt(0),
+                    "avatarInitial": props.user.username.charAt(0),
                     "imageId": doc.id
                 })
             })
@@ -102,7 +102,7 @@ const MainPage = props => {
     }
 
     const resetImageData = () => {
-        setImageModalData(imageDataModel(props.authData.user))
+        setImageModalData(imageDataModel(props.user))
     }
 
     const toBase64 = file => new Promise((resolve, reject) => {
@@ -146,7 +146,7 @@ const MainPage = props => {
         
         let deletedFromDb = false
         try {
-            await db.collection(props.authData.user.username).doc(id).delete()
+            await db.collection(props.user.username).doc(id).delete()
             deletedFromDb = true
         } catch(err) {
             alert("Error deleting image data")
@@ -169,7 +169,7 @@ const MainPage = props => {
 
     //UPDATING IMAGE
     const updateImage = async (data, file) => {
-        let email = props.authData.user.username
+        let email = props.user.username
         if (persistImageDataInDb(email, data.imageId, data, file) && imageUpdated) {
             persistImageInS3(data.imageId, file)
         }
@@ -192,7 +192,7 @@ const MainPage = props => {
 
     //CREATING IMAGE
     const createNewImage = async (data, file) => {
-        let email = props.authData.user.username
+        let email = props.user.username
         let id = new Date().valueOf() + "-" + email
         
         if (persistImageDataInDb(email, id, data, file)) {
@@ -224,16 +224,22 @@ const MainPage = props => {
                     Shopify Image Repository
                 </Typography>
                 <Button color="inherit" onClick={() => {
-                    props.authData.setAuth(false)
+                    props.setAuth(false)
                     props.history.push("/login")
                     Auth.signOut()
                 }}>Logout</Button>
                 </Toolbar>
             </AppBar>
             <div className="content" style={{ padding: "0px 16px 0px 16px" }}>
-                {/* <Typography variant="subtitle2">
-                    Hey {props.authData.user != null ? props.authData.user.username : "none"}. Welcome to your image repo. Add, update and delete images as you please.
-                </Typography> */}
+                {
+                    !props.userConfirmed && (
+                        <div style={{ marginTop: "1rem" }}>
+                            <Typography variant="subtitle2" style={{ color: 'red' }}>
+                                Hey {props.user.username}. Welcome to your image repo. Please verify your email address or you will not be able to login later. Thanks
+                            </Typography>
+                        </div>
+                    )
+                }
                 <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.8rem' }}>
                     <IconButton onClick={() => {
                         resetImageData()

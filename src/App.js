@@ -19,6 +19,8 @@ function App() {
   const [authenticated, setAuth] = useState(false)
   const [isAuthenticating, setIsAuthenticating] = useState(true)
   const [user, setUser] = useState(null)
+  const [userConfirmed, setUserConfirmed] = useState(false)
+
 
   useEffect(async () => {
     try{
@@ -26,28 +28,22 @@ function App() {
       setAuth(true)
       const user = await Auth.currentAuthenticatedUser()
       setUser(user)
+      setUserConfirmed(true)
       setIsAuthenticating(false)
     } catch(error) {
-      setIsAuthenticating(false)
+      setIsAuthenticating(true)
       setAuth(false)
       console.log(error)
     }
   }, [])
 
-  let authData = {
-    "authenticated": authenticated,
-    "setAuth": setAuth,
-    "user": user,
-    "setUser": setUser
-  }
 
   return (
-    !isAuthenticating && 
     <Router>
       <Switch>
-        <Route exact path="/" render={(props) => <MainPage {...props} authData={authData} />}></Route>
-        <Route exact path="/login" render={(props) => <Login {...props} authData={authData} />}></Route>
-        <Route exact path="/register" render={(props) => <Register {...props} authData={authData} />}></Route>
+        <Route exact path="/" render={(props) => ((!isAuthenticating && authenticated) ? <MainPage {...props} user={user} userConfirmed={userConfirmed} authenticated={authenticated} setAuth={setAuth}/> : <Redirect to="/login" />)}></Route>
+        <Route exact path="/login" render={(props) => <Login {...props} user={user} authenticated={authenticated} setAuth={setAuth} setUser={setUser} isAuthenticating={isAuthenticating} setIsAuthenticating={setIsAuthenticating} setUserConfirmed={setUserConfirmed}/>}></Route>
+        <Route exact path="/register" render={(props) => <Register {...props} user={user} authenticated={authenticated} setAuth={setAuth} setUser={setUser} isAuthenticating={isAuthenticating} setIsAuthenticating={setIsAuthenticating} />}></Route>
       </Switch>
     </Router>
   );

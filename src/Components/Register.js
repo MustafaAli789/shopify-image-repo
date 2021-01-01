@@ -53,10 +53,10 @@ export default function Register(props) {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if(props.authData.authenticated) {
+    if(props.authenticated && !props.isAuthenticating) {
         props.history.push("/")
     }
-  }, [props.authData.authenticated])
+  }, [props.authenticated, props.isAuthenticating])
 
   let signUpClicked = async () => {
     if (email.trim().length == 0 || password.trim().length == 0) {
@@ -71,10 +71,10 @@ export default function Register(props) {
                     email: email
                 }
             })
-            console.log(registerResp)
-            props.authData.setAuth(true)
-            props.authData.setUser(registerResp)
-            props.history.push("/")
+            props.setAuth(true)
+            debugger
+            props.setUser(registerResp.user)
+            props.setIsAuthenticating(false)
         } catch(error) {
             setError(error.message)
         }
