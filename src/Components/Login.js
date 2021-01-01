@@ -55,6 +55,7 @@ export default function Login(props) {
     if(props.authenticated && !props.isAuthenticating) {
         props.history.push("/")
     }
+    console.log(process.env)
   }, [props.authenticated, props.isAuthenticating])
 
   let signInClicked = async () => {
