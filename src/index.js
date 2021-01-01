@@ -9,16 +9,16 @@ import config from './config.json'
 Amplify.configure({
   Auth: {
     mandatorySignIn: true,
-    region: config.cognito.REGION,
-    userPoolId: config.cognito.USER_POOL_ID,
-    userPoolWebClientId: config.cognito.APP_CLIENT_ID,
+    region: process.env.REACT_APP_AMPLIFY_COGNITO_REGION,
+    userPoolId: process.env.REACT_APP_AMPLIFY_COGNITO_USER_POOL_ID,
+    userPoolWebClientId: process.env.REACT_APP_AMPLIFY_COGNITO_CLIENT_ID,
     authenticationFlowType: 'USER_PASSWORD_AUTH',
-    identityPoolId: config.cognito.IDENTITY_POOL_ID
+    identityPoolId: process.env.REACT_APP_AMPLIFY_COGNITO_IDENTITY_POOL_ID
   },
   Storage :{
     AWSS3: {
-      bucket: config.s3.BUCKET,
-      region: config.s3.REGION
+      bucket: process.env.REACT_APP_AMPLIFY_S3_BUCKET,
+      region: process.env.REACT_APP_AMPLIFY_S3_REGION
     }
   }
 })

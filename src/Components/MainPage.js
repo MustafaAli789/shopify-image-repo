@@ -9,7 +9,7 @@ import ImageCard from './ImageCard'
 import IconButton from '@material-ui/core/IconButton';
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import ImageModal from './ImageModal'
-import firebase from '../firebase'
+import firebase from '../firebaseWithSecrets'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,7 +24,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const imageDataModel = userData => {
-    debugger
     return {
         "avatarInitial": userData.username.charAt(0),
         "imageName": "",
