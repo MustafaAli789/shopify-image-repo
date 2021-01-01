@@ -46,7 +46,6 @@ const ImageModal = props => {
     const validateData = (title, file) => {
         let titleError = ""
         let fileError = ""
-        debugger
         if (title.trim().length == 0) {
             titleError = "Title must not be empty"
         } else {
@@ -144,7 +143,7 @@ const ImageModal = props => {
                     if (validateData(imageTitle, file)) {
                        if (props.action == "CREATE") {
                            props.createNewImage({
-                               "imageTitle":imageTitle,
+                               "title":imageTitle,
                                "description":imageDesc,
                                "color":imageColor,
                            }, file)

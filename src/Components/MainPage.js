@@ -9,6 +9,7 @@ import ImageCard from './ImageCard'
 import IconButton from '@material-ui/core/IconButton';
 import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
 import ImageModal from './ImageModal'
+import firebase from '../firebase'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -24,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 
 const imageDataModel = user => {
     return {
-        "avatarInitial": user != null ? user.username.charAt(0) : "",
+        "avatarInitial": user.username.charAt(0),
         "imageName": "",
         "imageId": "",
         "title": "",
@@ -42,42 +43,58 @@ const MainPage = props => {
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [imageModalAction, setImageModalAction] = useState('CREATE')
     const [imageModalData, setImageModalData] = useState(imageDataModel(props.authData.user))
+    const [db, setDb] = useState(null)
 
-    //Auth redirect
+    //Auth redirect and initialize images data
     useEffect(() => {
         if (!props.authData.authenticated) {
+            setDb(null)
+            setImagesData([])
             props.history.push("/login")
         }
+
+        setDb(firebase.firestore())
     }, [props.authData.authenticated])
 
-    //Retrieving images from s3 on initial load
-    useEffect( async () => {
-        try{
-            let photos = await Storage.list('', {level: 'private'})
-            console.log(photos)
-            photos.forEach(photo => {
-                Storage.get(photo.key, {level: 'private'})
-                    .then(res => {
-                        let imageData = {
-                            "avatarInitial": "M",
-                            "imageName": "example.png",
-                            "imageId": photo.key,
-                            "title": "Random Moment in Time",
-                            "date": "September 1 2001",
-                            "imageSrc": res,
-                            "description": "This impressive paella is a perfect party dish and a fun meal to cook together with your guests. Add 1 cup of frozen peas along with the mussels, if you like.",
-                            "color": "#FF0000"
-                        }
-                        setImagesData([...imagesData, imageData])
-                    })
-            });
-        } catch(err) {
-            console.log(err)
+    useEffect(() => {
+        if (db != null) {
+            initializeImageData()
         }
-    }, [])
+    }, [db])
+
+    const initializeImageData = async () => {
+        let email = props.authData.user.username
+        let imagesData = []
+        try {
+            const snapshot = await db.collection(email).get()
+            debugger
+            imagesData = snapshot.docs.map(doc => {
+                return Object.assign({}, doc.data(), { 
+                    "avatarInitial": props.authData.user.username.charAt(0),
+                    "imageId": doc.id
+                })
+            })
+        } catch(err) {
+            alert("Issue in retrieving image data", err)
+            return
+        }
+
+        for (let i =0; i<imagesData.length; i++) {
+            let image = imagesData[i]
+            await Storage.get(image.imageId, {level: 'private'})
+                .then(res => {
+                    image.imageSrc = res
+                })
+                .catch((err) => {
+                    alert("Issue retrieving image, blank image will be used", err)
+                    //TODO update this to an actual image in resources
+                    image.imageSrc = ""
+                })
+        }
+        setImagesData(imagesData)
+    }
 
     const onImageCardUpdateClick = imageData => {
-        debugger
         setImageModalAction('UPDATE')
         setImageModalData(imageData)
         setImageModalOpen(true)
@@ -91,12 +108,30 @@ const MainPage = props => {
         console.log(id)
     }
 
+    //UPDATING IMAGE
     const updateImg = imageData => {
         //open modal and allow for image updating
     }
 
+    //CREATING IMAGE
     const createNewImage = (imageData, file) => {
-        console.log(imageData, file)
+        let email = props.authData.user.username
+        let id = new Date().valueOf() + "-" + email
+        db.collection(email).doc(id).set({
+            imageName: file.name,
+            title: imageData.title,
+            description: imageData.description,
+            date: new Date().toISOString().split('T')[0],
+            color: imageData.color
+        })
+        .then(() => {
+            Storage.put(id, file, {
+                level: 'private',
+                contentType: 'image/png'
+            })
+            .catch(err => alert("Image data was saved but error persisting image", err))
+        })
+        .catch(err => alert("Problem persisting data and image", err))
     }
 
     return (

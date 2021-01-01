@@ -24,9 +24,9 @@ function App() {
     try{
       const session = await Auth.currentSession()
       setAuth(true)
-      setIsAuthenticating(false)
       const user = await Auth.currentAuthenticatedUser()
       setUser(user)
+      setIsAuthenticating(false)
     } catch(error) {
       setIsAuthenticating(false)
       setAuth(false)
