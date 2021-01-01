@@ -43,6 +43,8 @@ const MainPage = props => {
     const [imageModalOpen, setImageModalOpen] = useState(false)
     const [imageModalAction, setImageModalAction] = useState('CREATE')
     const [imageModalData, setImageModalData] = useState(imageDataModel(props.authData.user))
+    const [imageUpdated, setImageUpdated] = useState(false)
+
     const [db, setDb] = useState(null)
 
     //Auth redirect and initialize images data
@@ -110,6 +112,35 @@ const MainPage = props => {
         reader.onerror = error => reject(error);
     });
 
+    const persistImageDataInDb = async (email, id, data, file) => {
+        try {
+            await db.collection(email).doc(id).set({
+                imageName: file.name,
+                title: data.title,
+                description: data.description,
+                date: new Date().toISOString().split('T')[0],
+                color: data.color
+            })
+            return true
+        } catch (err) {
+            alert("Error persisting image data", err)
+            return false
+        }
+    }
+
+    const persistImageInS3 = async (id, file) => {
+        try{
+            await Storage.put(id, file, {
+                level: 'private',
+                contentType: 'image/png'
+            })
+            return true
+        }catch(err) {
+            alert("Error persisting image", err)
+            return false
+        }
+    }
+
     //DELETEING IMAGE
     const deleteImage = async (id) => {
         debugger
@@ -132,36 +163,35 @@ const MainPage = props => {
     }
 
     //UPDATING IMAGE
-    const updateImg = imageData => {
-        //open modal and allow for image updating
+    const updateImage = async (data, file) => {
+        let email = props.authData.user.username
+        if (persistImageDataInDb(email, data.imageId, data, file) && imageUpdated) {
+            persistImageInS3(data.imageId, file)
+        }
+
+        debugger
+        let tempData = imagesData
+        for (let i =0; i< tempData.length; i++) {
+            if (tempData[i].imageId == data.imageId) {
+                tempData[i] = {...tempData[i], ...data}
+                if (imageUpdated) {
+                    let src = await toBase64(file)
+                    tempData[i].imageSrc = src
+                }
+                break
+            }
+        }
+        setImagesData(tempData)
+        setImageModalOpen(false)
     }
 
     //CREATING IMAGE
     const createNewImage = async (data, file) => {
-        debugger
         let email = props.authData.user.username
         let id = new Date().valueOf() + "-" + email
-        debugger
-        try {
-            await db.collection(email).doc(id).set({
-                imageName: file.name,
-                title: data.title,
-                description: data.description,
-                date: new Date().toISOString().split('T')[0],
-                color: data.color
-            })
-        } catch (err) {
-            alert("Error persisting image data", err)
-            return
-        }
-
-        try{
-            await Storage.put(id, file, {
-                level: 'private',
-                contentType: 'image/png'
-            })
-        }catch(err) {
-            alert("Error persisting image", err)
+        
+        if (persistImageDataInDb(email, id, data, file)) {
+            persistImageInS3(id, file)
         }
 
         let imageSrc = await toBase64(file)
@@ -176,11 +206,12 @@ const MainPage = props => {
             "imageSrc": imageSrc
         }
         setImagesData([...imagesData, imageDataObj])
+        setImageModalOpen(false)
     }
 
     return (
         <div>
-            <ImageModal createNewImage={(imageData, file) => createNewImage(imageData, file)} imageModalData={imageModalData} setImageModalData={setImageModalData} imageModalOpen={imageModalOpen} setImageModalOpen={(state) => setImageModalOpen(state)} action={imageModalAction} />
+            <ImageModal createNewImage={createNewImage} updateImage={updateImage} imageModalData={imageModalData} setImageModalData={setImageModalData} imageModalOpen={imageModalOpen} setImageModalOpen={(state) => setImageModalOpen(state)} action={imageModalAction} setImageUpdated={(state) => setImageUpdated(state)} />
             <AppBar position="static">
                 <Toolbar>
                 <Typography variant="h6" className={classes.title}>

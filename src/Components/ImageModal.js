@@ -29,6 +29,7 @@ const ImageModal = props => {
         if (props.imageModalData["imageSrc"] != "") {
             let img = new File([""], props.imageModalData["imageName"],{type: "image/png"})
             setFile(img)
+            props.setImageUpdated(false)
         } else {
             setFile(null)
         }
@@ -119,8 +120,12 @@ const ImageModal = props => {
                         dropzoneText={"Drag and drop an image here or click"}
                         onChange={(files) => {
                             console.log(files)
+                            debugger
                             if (files[0] == undefined) {
                                 setFile(null)
+                                if (props.action != 'CREATE') {
+                                    props.setImageUpdated(true)
+                                }
                             } else {
                                 setFile(files[0])
                             }
@@ -147,6 +152,13 @@ const ImageModal = props => {
                                "description":imageDesc,
                                "color":imageColor,
                            }, file)
+                       } else {
+                            props.updateImage({
+                                "title":imageTitle,
+                                "description":imageDesc,
+                                "color":imageColor,
+                                "imageId": props.imageModalData.imageId
+                            }, file)
                        }
                     }
                 }} 
