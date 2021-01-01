@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, ThemeProvider } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -111,8 +111,24 @@ const MainPage = props => {
     });
 
     //DELETEING IMAGE
-    const deleteImage = id => {
-        console.log(id)
+    const deleteImage = async (id) => {
+        debugger
+        try {
+            await db.collection(props.authData.user.username).doc(id).delete()
+        } catch(err) {
+            alert("Error deleting image data")
+        }
+
+        try {
+            await Storage.remove(id, { level: 'private' })
+        } catch(err) {
+            alert("Error deleting image data")
+        }
+        let tempData = imagesData
+        tempData = tempData.filter(img => {
+            return img.imageId != id
+        })
+        setImagesData(tempData)
     }
 
     //UPDATING IMAGE
@@ -134,11 +150,17 @@ const MainPage = props => {
                 date: new Date().toISOString().split('T')[0],
                 color: data.color
             })
-           await Storage.put(id, file, {
+        } catch (err) {
+            alert("Error persisting image data", err)
+            return
+        }
+
+        try{
+            await Storage.put(id, file, {
                 level: 'private',
                 contentType: 'image/png'
             })
-        } catch (err) {
+        }catch(err) {
             alert("Error persisting image", err)
         }
 

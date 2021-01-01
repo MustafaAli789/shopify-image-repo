@@ -58,7 +58,7 @@ const ImageCard = props => {
                 <Button size="small" color="primary" onClick={() => props.updateImage(props.imageData)}>
                 	Update
                 </Button>
-                <Button size="small" color="primary">
+                <Button size="small" color="primary" onClick={props.deleteImg}>
                 	Delete
                 </Button>
             </CardActions>
